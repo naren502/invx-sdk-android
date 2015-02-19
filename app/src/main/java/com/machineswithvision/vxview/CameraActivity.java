@@ -100,7 +100,7 @@ public class CameraActivity extends Activity {
                         existingSurfaceHasSize = true;
                     }
                     final OutputView o = (OutputView)findViewById(R.id.output_view);
-                    o.setSize(width, height);
+                    o.setScreenSize(width,height);
                 }
             }
 
@@ -282,7 +282,9 @@ public class CameraActivity extends Activity {
 
     private Camera.PreviewCallback previewCallback = new Camera.PreviewCallback() {
         public void onPreviewFrame(byte[] data, Camera camera) {
-
+            final OutputView o = (OutputView)findViewById(R.id.output_view);
+            o.setImage(data, preWidth, preHeight);
+            o.invalidate();
         }
     };
 }
