@@ -99,6 +99,8 @@ public class CameraActivity extends Activity {
 
                         existingSurfaceHasSize = true;
                     }
+                    final OutputView o = (OutputView)findViewById(R.id.output_view);
+                    o.setSize(width, height);
                 }
             }
 
