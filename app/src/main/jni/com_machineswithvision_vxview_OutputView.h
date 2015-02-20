@@ -166,10 +166,10 @@ extern "C" {
 /*
  * Class:     com_machineswithvision_vxview_OutputView
  * Method:    processBytes
- * Signature: (Ljava/nio/ByteBuffer;)V
+ * Signature: (Ljava/nio/ByteBuffer;III)V
  */
 JNIEXPORT void JNICALL Java_com_machineswithvision_vxview_OutputView_processBytes
-  (JNIEnv *, jobject, jobject);
+  (JNIEnv *, jobject, jobject, jint, jint, jint);
 
 #ifdef __cplusplus
 }

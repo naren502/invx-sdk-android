@@ -53,7 +53,7 @@ public class OutputView extends View {
 
             ByteBuffer buffer = ByteBuffer.allocateDirect(bytes.length);
             buffer.put(bytes);
-            processBytes(buffer);
+            processBytes(buffer,width,height,1);
             buffer.clear();
             buffer.get(bytes);
 
@@ -81,5 +81,5 @@ public class OutputView extends View {
         }
     }
 
-    private native void processBytes(ByteBuffer buffer);
+    private native void processBytes(ByteBuffer buffer, int width, int height, int depth);
 }
