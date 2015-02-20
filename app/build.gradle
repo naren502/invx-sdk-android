@@ -1,3 +1,5 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 apply plugin: 'com.android.application'
 
 android {
@@ -10,7 +12,34 @@ android {
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"
+        ndk {
+            moduleName "NDK"
+        }
     }
+
+    sourceSets.main {
+        jniLibs.srcDir 'src/main/libs'
+        jni.srcDirs = [] //disable automatic ndk-build call
+    }
+
+    // call regular ndk-build(.cmd) script from app directory
+    task ndkBuild(type: Exec) {
+        println 'Inside task ndkBuild'
+        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+            println 'calling ndk-build.cmd'
+            commandLine "/usr/local/Cellar/android-ndk/r10d/ndk-build.cmd", '-C', file('src/main/jni').absolutePath
+            println 'done'
+        } else {
+            println 'ndk-build'
+            commandLine "/usr/local/Cellar/android-ndk/r10d/ndk-build", '-C', file('src/main/jni').absolutePath
+            println 'done'
+        }
+    }
+
+    tasks.withType(JavaCompile) {
+        compileTask -> compileTask.dependsOn ndkBuild
+    }
+
     buildTypes {
         release {
             minifyEnabled false

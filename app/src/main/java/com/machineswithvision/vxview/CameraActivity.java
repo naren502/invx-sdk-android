@@ -17,6 +17,10 @@ import java.io.IOException;
 public class CameraActivity extends Activity {
     private static final String TAG = "CameraActivity";
 
+    static {
+        System.loadLibrary("NDK");
+    }
+
     // State
     private boolean weHaveBeenResumed = false;
     private boolean existingSurfaceHasSize = false;
