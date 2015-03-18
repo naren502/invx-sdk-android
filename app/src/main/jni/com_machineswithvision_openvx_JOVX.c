@@ -1,4 +1,4 @@
-#include "com_machineswithvision_vxview_OutputView.h"
+#include "com_machineswithvision_openvx_JOVX.h"
 
 #include <android/log.h>
 #include <stdio.h>
@@ -6,8 +6,16 @@
 
 void vx_test_canny(int width,int height,int depth,void* bytes);
 
-JNIEXPORT void JNICALL Java_com_machineswithvision_vxview_OutputView_processBytes
-   (JNIEnv *env, jobject obj, jobject buffer, jint width, jint height, jint depth)
+vx_context context = 0;
+
+JNIEXPORT void JNICALL Java_com_machineswithvision_openvx_JOVX_jovxCreateContext
+  (JNIEnv *env, jclass cls)
+{
+    context = vxCreateContext();
+}
+
+JNIEXPORT void JNICALL Java_com_machineswithvision_openvx_JOVX_processBytes
+   (JNIEnv *env, jclass cls, jobject buffer, jint width, jint height, jint depth)
 {
 
 
@@ -24,6 +32,15 @@ JNIEXPORT void JNICALL Java_com_machineswithvision_vxview_OutputView_processByte
      }
 }
 
+JNIEXPORT void JNICALL Java_com_machineswithvision_openvx_JOVX_jovxReleaseContext
+  (JNIEnv *env, jclass cls)
+{
+    if (context) {
+        vxReleaseContext(&context);
+        context = 0;
+    }
+}
+
 // --------------------------
 
 void vx_test_canny(int width,int height,int depth,void* bytes)
@@ -37,9 +54,6 @@ void vx_test_canny(int width,int height,int depth,void* bytes)
             };
 
             // Openvx
-			vx_context context;
-            context = vxCreateContext();
-
             if (context) {
                 vx_image hframe = vxCreateImageFromHandle(context,VX_DF_IMAGE_U8,addrs,src_ptrs,VX_IMPORT_TYPE_HOST);
                 if (vxGetStatus((vx_reference)hframe) != VX_SUCCESS)
@@ -72,7 +86,6 @@ void vx_test_canny(int width,int height,int depth,void* bytes)
                 }
 
                 vxReleaseImage(&hframe);
-			    vxReleaseContext(&context);
 			} else {
 			    __android_log_print(ANDROID_LOG_VERBOSE, "NDK", "Failed to create openvx context");
 			}

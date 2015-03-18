@@ -7,9 +7,9 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
+
+import com.machineswithvision.openvx.JOVX;
 
 import java.nio.ByteBuffer;
 
@@ -53,7 +53,9 @@ public class OutputView extends View {
 
             ByteBuffer buffer = ByteBuffer.allocateDirect(bytes.length);
             buffer.put(bytes);
-            processBytes(buffer,width,height,1);
+            Log.d(TAG, "Calling processBytes");
+            JOVX.processBytes(buffer, width, height, 1);
+            Log.d(TAG, "Done processBytes");
             buffer.clear();
             buffer.get(bytes);
 
@@ -80,6 +82,4 @@ public class OutputView extends View {
             super.onDraw(canvas);
         }
     }
-
-    private native void processBytes(ByteBuffer buffer, int width, int height, int depth);
 }

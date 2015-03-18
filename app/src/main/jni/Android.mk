@@ -36,7 +36,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := NDK
 LOCAL_SRC_FILES := \
-     com_machineswithvision_vxview_OutputView.c
+     com_machineswithvision_openvx_JOVX.c
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../../openvx/include
 LOCAL_SHARED_LIBRARIES := openvx vxu openvx-c_model openvx-extras

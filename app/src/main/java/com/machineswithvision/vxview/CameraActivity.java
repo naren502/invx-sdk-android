@@ -12,6 +12,9 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.Window;
 import android.view.WindowManager;
+
+import com.machineswithvision.openvx.JOVX;
+
 import java.io.IOException;
 
 public class CameraActivity extends Activity {
@@ -43,8 +46,19 @@ public class CameraActivity extends Activity {
      *
      */
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        JOVX.jovxReleaseContext();
+    }
+
+    /**
+     *
+     */
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        JOVX.jovxCreateContext();
 
         // Create a fixed-orientation fullscreen view with no title
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
