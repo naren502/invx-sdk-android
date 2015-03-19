@@ -7,6 +7,10 @@
 void vx_test_canny(int width,int height,int depth,void* bytes);
 
 vx_context context = 0;
+void *inputBuffer = 0;
+vx_graph graph = 0;
+vx_image hframe = 0;
+vx_image edges = 0;
 
 JNIEXPORT void JNICALL Java_com_machineswithvision_openvx_JOVX_jovxCreateContext
   (JNIEnv *env, jclass cls)
@@ -35,10 +39,16 @@ JNIEXPORT void JNICALL Java_com_machineswithvision_openvx_JOVX_processBytes
 JNIEXPORT void JNICALL Java_com_machineswithvision_openvx_JOVX_jovxReleaseContext
   (JNIEnv *env, jclass cls)
 {
+
+    if (hframe) vxReleaseImage(&hframe);
+    if (edges) vxReleaseImage(&edges);
+
     if (context) {
         vxReleaseContext(&context);
         context = 0;
     }
+
+    if (inputBuffer) free(&inputBuffer);
 }
 
 // --------------------------
@@ -49,43 +59,57 @@ void vx_test_canny(int width,int height,int depth,void* bytes)
                 {width,height,sizeof(vx_uint8)*depth,width * sizeof(vx_uint8)*depth,VX_SCALE_UNITY,VX_SCALE_UNITY, 1, 1}
             };
 
+            if (!inputBuffer) inputBuffer = calloc(width*height, sizeof(vx_uint8));
+
             void* src_ptrs[] = { // Each plane!
-                bytes
+                inputBuffer
             };
+
+            memcpy(inputBuffer, bytes, width*height*sizeof(vx_uint8));
 
             // Openvx
             if (context) {
-                vx_image hframe = vxCreateImageFromHandle(context,VX_DF_IMAGE_U8,addrs,src_ptrs,VX_IMPORT_TYPE_HOST);
-                if (vxGetStatus((vx_reference)hframe) != VX_SUCCESS)
-                {
-                    __android_log_print(ANDROID_LOG_VERBOSE, "NDK", "ERROR: input vx_image not initialised!\n");
-                    vxReleaseImage(&hframe);
-                }
 
-                if (hframe)// input && output)
-                {
+                if (!graph) {
+                    graph = vxCreateGraph(context);
 
-                    vx_image edges = vxCreateImage(context, width, height, VX_DF_IMAGE_U8);
-
-                    vx_threshold hyst = vxCreateThreshold(context, VX_THRESHOLD_TYPE_RANGE, VX_TYPE_UINT8);
-                    vx_int32 lower = 40, upper = 250;
-                    vxSetThresholdAttribute(hyst, VX_THRESHOLD_ATTRIBUTE_THRESHOLD_LOWER, &lower, sizeof(lower));
-                    vxSetThresholdAttribute(hyst, VX_THRESHOLD_ATTRIBUTE_THRESHOLD_UPPER, &upper, sizeof(upper));
-
-                    if (vxuCannyEdgeDetector(context,hframe,hyst,3,VX_NORM_L1,edges)!=VX_SUCCESS)
+                    hframe = vxCreateImageFromHandle(context,VX_DF_IMAGE_U8,addrs,src_ptrs,VX_IMPORT_TYPE_HOST);
+                    if (vxGetStatus((vx_reference)hframe) != VX_SUCCESS)
                     {
-                        __android_log_print(ANDROID_LOG_VERBOSE, "NDK", "ERROR: failed to do function!\n");
+                        __android_log_print(ANDROID_LOG_VERBOSE, "NDK", "ERROR: input vx_image not initialised!\n");
+                        vxReleaseImage(&hframe);
                     }
 
-                    vx_rectangle_t rect;
-                    rect.start_x = rect.start_y = 0;
-                    rect.end_x = width;
-                    rect.end_y = height;
+                    if (hframe)// input && output)
+                    {
+                        edges = vxCreateImage(context, width, height, VX_DF_IMAGE_U8);
 
-                    vxAccessImagePatch(edges,&rect,0,&addrs[0],&bytes,VX_READ_ONLY);
+                        vx_threshold hyst = vxCreateThreshold(context, VX_THRESHOLD_TYPE_RANGE, VX_TYPE_UINT8);
+                        vx_int32 lower = 40, upper = 250;
+                        vxSetThresholdAttribute(hyst, VX_THRESHOLD_ATTRIBUTE_THRESHOLD_LOWER, &lower, sizeof(lower));
+                        vxSetThresholdAttribute(hyst, VX_THRESHOLD_ATTRIBUTE_THRESHOLD_UPPER, &upper, sizeof(upper));
+
+                        if (!vxCannyEdgeDetectorNode(graph,hframe,hyst,3,VX_NORM_L1,edges))
+                        {
+                            __android_log_print(ANDROID_LOG_VERBOSE, "NDK", "ERROR: failed to create node!\n");
+                        }
+
+                        if (vxVerifyGraph(graph) != VX_SUCCESS) {
+                            __android_log_print(ANDROID_LOG_VERBOSE, "NDK", "ERROR: input verifying graph!\n");
+                        }
+                    }
                 }
 
-                vxReleaseImage(&hframe);
+                if (vxProcessGraph(graph) != VX_SUCCESS) {
+                    __android_log_print(ANDROID_LOG_VERBOSE, "NDK", "ERROR: error processing graph!\n");
+                }
+
+                vx_rectangle_t rect;
+                rect.start_x = rect.start_y = 0;
+                rect.end_x = width;
+                rect.end_y = height;
+
+                vxAccessImagePatch(edges,&rect,0,&addrs[0],&bytes,VX_READ_ONLY);
 			} else {
 			    __android_log_print(ANDROID_LOG_VERBOSE, "NDK", "Failed to create openvx context");
 			}
