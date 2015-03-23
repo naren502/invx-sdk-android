@@ -25,6 +25,14 @@ include $(PREBUILT_SHARED_LIBRARY)
 # ------
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := openvx-debug
+LOCAL_SRC_FILES := $(LOCAL_PATH)/../../../openvx/$(TARGET_ARCH_ABI)/libopenvx-debug.so
+$(warning $(TARGET_ARCH_ABI))
+include $(PREBUILT_SHARED_LIBRARY)
+
+# ------
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := openvx-extras
 LOCAL_SRC_FILES := $(LOCAL_PATH)/../../../openvx/$(TARGET_ARCH_ABI)/libopenvx-extras.so
 $(warning $(TARGET_ARCH_ABI))
@@ -39,7 +47,7 @@ LOCAL_SRC_FILES := \
      com_machineswithvision_openvx_JOVX.c
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../../openvx/include
-LOCAL_SHARED_LIBRARIES := openvx vxu openvx-c_model openvx-extras
+LOCAL_SHARED_LIBRARIES := openvx vxu openvx-extras openvx-debug openvx-c_model
 LOCAL_LDLIBS += -llog
 
 include $(BUILD_SHARED_LIBRARY)
