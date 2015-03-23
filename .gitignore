@@ -1,8 +1,9 @@
-.gradle
-/local.properties
-/.idea/workspace.xml
-/.idea/libraries
+vxview/.gradle
+vxview/local.properties
+vxview/.idea/workspace.xml
+vxview/.idea/libraries
 .DS_Store
-/build
-app/src/main/libs
-app/src/main/obj
+vxview/build
+vxview/app/build
+vxview/app/src/main/libs
+vxview/app/src/main/obj
