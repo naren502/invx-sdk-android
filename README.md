@@ -1,5 +1,5 @@
-invx-sdk-android Version 1.0
-============================
+InVX SDK for Android Version 1.0
+================================
 
 The InVX SDK enables the development of OpenVX applications for Android devices. The SDK comprises the invx library (pre-built shared libraries and header files) and an example OpenVX application, VXView. 
 
