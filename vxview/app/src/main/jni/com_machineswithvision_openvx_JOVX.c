@@ -48,7 +48,7 @@ JNIEXPORT void JNICALL Java_com_machineswithvision_openvx_JOVX_jovxReleaseContex
         context = 0;
     }
 
-    if (inputBuffer) free(&inputBuffer);
+    if (inputBuffer) free(inputBuffer);
 }
 
 // --------------------------
