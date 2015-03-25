@@ -27,7 +27,7 @@ import android.opengl.GLSurfaceView.Renderer;
 
 public class Overlay implements Renderer {
 
-    private static int MAX_POINTS = 50000;
+    public static int MAX_POINTS = 50000;
 
     private FloatBuffer _vertexBuffer=null;
     private int _numVertices=0;
@@ -80,17 +80,6 @@ public class Overlay implements Renderer {
         for(int i=0;i<numEdges&&i<MAX_POINTS;i++) {
             _vertexBuffer.put((float)edgesX[i]*ws);
             _vertexBuffer.put((float)edgesY[i]*hs);
-            _numVertices++;
-        }
-        _vertexBuffer.position(0);
-    }
-
-    public synchronized void updateEdgeMap() {
-        _vertexBuffer.position(0);
-        _numVertices = 0;
-        for(int i=0;i<100;i++) {
-            _vertexBuffer.put((float)i);
-            _vertexBuffer.put((float)i);
             _numVertices++;
         }
         _vertexBuffer.position(0);

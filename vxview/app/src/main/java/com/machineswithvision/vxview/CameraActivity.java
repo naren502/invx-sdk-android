@@ -56,7 +56,7 @@ public class CameraActivity extends Activity {
     // Components
     private SurfaceHolder holder;
     private Camera camera;
-    private Overlay _overlay;
+    private Overlay _overlay = null;
 
     private boolean focusAuto = false;
     private boolean focused = true;
@@ -345,24 +345,26 @@ public class CameraActivity extends Activity {
             JOVX.processBytes(buffer, preWidth, preHeight, 1);
             Log.d(TAG, "Done processBytes");
             buffer.clear();
-            buffer.get(yuv,0,preWidth*preHeight);
+            buffer.get(yuv, 0, preWidth * preHeight);
 
-            int[] ex = new int[50000];
-            int[] ey = new int[50000];
+            int[] ex = new int[_overlay.MAX_POINTS];
+            int[] ey = new int[_overlay.MAX_POINTS];
             int numEdges = 0;
             for(int y=0;y<preHeight;y++) {
                 for(int x=0;x<preWidth;x++) {
                     if (yuv[x+y*preWidth]!=0) {
-                        ex[numEdges]=x;
-                        ey[numEdges]=y;
-                        numEdges++;
+                        if (numEdges<_overlay.MAX_POINTS) {
+                            ex[numEdges] = x;
+                            ey[numEdges] = y;
+                            numEdges++;
+                        }
                     }
                 }
             }
 
             float ws=(float)disWidth/(float)preWidth;
             float hs=(float)disHeight/(float)preHeight;
-            _overlay.updateEdgeMap(ex,ey,numEdges,ws,hs);
+            if (_overlay!=null) _overlay.updateEdgeMap(ex,ey,numEdges,ws,hs);
         }
     };
 }

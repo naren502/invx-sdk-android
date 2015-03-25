@@ -42,10 +42,6 @@ JNIEXPORT void JNICALL Java_com_machineswithvision_openvx_JOVX_processBytes
     void* ptr = (*env)->GetDirectBufferAddress(env,buffer);
 
     if (ptr) {
-        //jlong size = (*env)->GetDirectBufferCapacity(env,buffer);
-
-        //int i;
-        //for(i=0;i<size;i++) ptr[i]=(char)(255-(0xFF&(int)ptr[i]));
         vx_test_canny(width, height, depth, ptr);
      } else {
         __android_log_print(ANDROID_LOG_VERBOSE, "NDK", "ptr is NULL!D\n");
@@ -56,15 +52,27 @@ JNIEXPORT void JNICALL Java_com_machineswithvision_openvx_JOVX_jovxReleaseContex
   (JNIEnv *env, jclass cls)
 {
 
-    if (hframe) vxReleaseImage(&hframe);
-    if (edges) vxReleaseImage(&edges);
+    if (hframe) {
+        vxReleaseImage(&hframe);
+        hframe = 0;
+    }
+
+    if (edges) {
+        vxReleaseImage(&edges);
+        edges = 0;
+    }
 
     if (context) {
         vxReleaseContext(&context);
         context = 0;
     }
 
-    if (inputBuffer) free(inputBuffer);
+    if (inputBuffer) {
+        free(inputBuffer);
+        inputBuffer = 0;
+    }
+
+    graph = 0;
 }
 
 // --------------------------
@@ -116,18 +124,20 @@ void vx_test_canny(int width,int height,int depth,void* bytes)
                     }
                 }
 
-                if (vxProcessGraph(graph) != VX_SUCCESS) {
-                    __android_log_print(ANDROID_LOG_VERBOSE, "NDK", "ERROR: error processing graph!\n");
+                if (graph) {
+                    if (vxProcessGraph(graph) != VX_SUCCESS) {
+                     __android_log_print(ANDROID_LOG_VERBOSE, "NDK", "ERROR: error processing graph!\n");
+                    }
+
+                    vx_rectangle_t rect;
+                    rect.start_x = rect.start_y = 0;
+                    rect.end_x = width;
+                    rect.end_y = height;
+
+                    vxAccessImagePatch(edges,&rect,0,&addrs[0],&bytes,VX_READ_ONLY);
                 }
-
-                vx_rectangle_t rect;
-                rect.start_x = rect.start_y = 0;
-                rect.end_x = width;
-                rect.end_y = height;
-
-                vxAccessImagePatch(edges,&rect,0,&addrs[0],&bytes,VX_READ_ONLY);
 			} else {
-			    __android_log_print(ANDROID_LOG_VERBOSE, "NDK", "Failed to create openvx context");
+			    __android_log_print(ANDROID_LOG_VERBOSE, "NDK", "No context. Skipping processing.");
 			}
 }
 
