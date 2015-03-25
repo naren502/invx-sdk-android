@@ -18,20 +18,24 @@ package com.machineswithvision.vxview;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
+import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
+import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 
 import com.machineswithvision.openvx.JOVX;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 public class CameraActivity extends Activity {
     private static final String TAG = "CameraActivity";
@@ -46,10 +50,13 @@ public class CameraActivity extends Activity {
     private boolean cameraIsActive = false;
     private int preWidth;
     private int preHeight;
+    private int disWidth;
+    private int disHeight;
 
     // Components
     private SurfaceHolder holder;
     private Camera camera;
+    private Overlay _overlay;
 
     private boolean focusAuto = false;
     private boolean focused = true;
@@ -96,9 +103,11 @@ public class CameraActivity extends Activity {
                 synchronized (CameraActivity.this) {
                     if (weHaveBeenResumed) {
                         createCamera();
-                        if (Log.isLoggable(TAG, Log.DEBUG)) Log.d(TAG, "Surface created - creating camera");
+                        if (Log.isLoggable(TAG, Log.DEBUG))
+                            Log.d(TAG, "Surface created - creating camera");
                     } else {
-                        if (Log.isLoggable(TAG, Log.DEBUG)) Log.d(TAG, "Surface created - not yet resumed so don't create the camera");
+                        if (Log.isLoggable(TAG, Log.DEBUG))
+                            Log.d(TAG, "Surface created - not yet resumed so don't create the camera");
                     }
                 }
             }
@@ -108,33 +117,35 @@ public class CameraActivity extends Activity {
              */
             @Override
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-                if (Log.isLoggable(TAG, Log.DEBUG)) Log.d(TAG, "Surface changed: "+format+","+width+","+height);
+                if (Log.isLoggable(TAG, Log.DEBUG))
+                    Log.d(TAG, "Surface changed: " + format + "," + width + "," + height);
                 synchronized (CameraActivity.this) {
                     if (cameraIsActive) {
-                        if (Log.isLoggable(TAG, Log.WARN)) Log.w(TAG, "Scanner is already active - ignoring!");
+                        if (Log.isLoggable(TAG, Log.WARN))
+                            Log.w(TAG, "Scanner is already active - ignoring!");
                     } else {
                         // We always expect the reader screen to run fixed in landscape mode.
                         // In some circs the moto milestone running 2.1 reverses the width/height
-                        if (width<height) {
-                            if (Log.isLoggable(TAG, Log.WARN)) Log.w(TAG, "Width and height appear to be swapped - swapping back!");
+                        if (width < height) {
+                            if (Log.isLoggable(TAG, Log.WARN))
+                                Log.w(TAG, "Width and height appear to be swapped - swapping back!");
                             int tmp = width;
                             width = height;
                             height = tmp;
                         }
 
-                        preWidth = width;
-                        preHeight = height;
+                        disWidth = width;
+                        disHeight = height;
 
                         if (weHaveBeenResumed) {
                             startCamera();
                         } else {
-                            if (Log.isLoggable(TAG, Log.DEBUG))Log.d(TAG, "Not yet resumed so don't start the camera yet!");
+                            if (Log.isLoggable(TAG, Log.DEBUG))
+                                Log.d(TAG, "Not yet resumed so don't start the camera yet!");
                         }
 
                         existingSurfaceHasSize = true;
                     }
-                    final OutputView o = (OutputView)findViewById(R.id.output_view);
-                    o.setScreenSize(width,height);
                 }
             }
 
@@ -143,14 +154,25 @@ public class CameraActivity extends Activity {
              */
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
-                if (Log.isLoggable(TAG, Log.DEBUG))Log.d(TAG, "Surface destroyed");
+                if (Log.isLoggable(TAG, Log.DEBUG)) Log.d(TAG, "Surface destroyed");
                 existingSurfaceHasSize = false;
 
                 if (cameraIsActive) {
-                    if (Log.isLoggable(TAG, Log.WARN)) Log.w(TAG, "We should never get here with an active camera!");
+                    if (Log.isLoggable(TAG, Log.WARN))
+                        Log.w(TAG, "We should never get here with an active camera!");
                 }
             }
         });
+
+        GLSurfaceView glView = new GLSurfaceView(this);
+        glView.setZOrderMediaOverlay(true);
+        glView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+        glView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
+
+        _overlay=new Overlay();
+        glView.setRenderer(_overlay);
+        LayoutParams layout=new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.FILL_PARENT);
+        addContentView(glView, layout);
     }
 
     /**
@@ -244,7 +266,7 @@ public class CameraActivity extends Activity {
         //Attempt to set up camera with VGA preview frame output or as close as possible
         ResolutionOptions preOptions = new ResolutionOptions(parameters.get("preview-size-values"));
         if (preOptions.getSize()>0) {
-            ResolutionOptions.Option selected = preOptions.leastDifference(640, 480);
+            ResolutionOptions.Option selected = preOptions.leastDifference(240, 320);
             preWidth = selected.getWidth();
             preHeight = selected.getHeight();
             Log.d(TAG, "Preview setup as "+preWidth+"x"+preHeight);
@@ -315,10 +337,32 @@ public class CameraActivity extends Activity {
     }
 
     private Camera.PreviewCallback previewCallback = new Camera.PreviewCallback() {
-        public void onPreviewFrame(byte[] data, Camera camera) {
-            final OutputView o = (OutputView)findViewById(R.id.output_view);
-            o.setImage(data, preWidth, preHeight);
-            o.invalidate();
+        public void onPreviewFrame(byte[] yuv, Camera camera) {
+
+            ByteBuffer buffer = ByteBuffer.allocateDirect(preWidth*preHeight);
+            buffer.put(yuv,0,preWidth*preHeight);
+            Log.d(TAG, "Calling processBytes");
+            JOVX.processBytes(buffer, preWidth, preHeight, 1);
+            Log.d(TAG, "Done processBytes");
+            buffer.clear();
+            buffer.get(yuv,0,preWidth*preHeight);
+
+            int[] ex = new int[50000];
+            int[] ey = new int[50000];
+            int numEdges = 0;
+            for(int y=0;y<preHeight;y++) {
+                for(int x=0;x<preWidth;x++) {
+                    if (yuv[x+y*preWidth]!=0) {
+                        ex[numEdges]=x;
+                        ey[numEdges]=y;
+                        numEdges++;
+                    }
+                }
+            }
+
+            float ws=(float)disWidth/(float)preWidth;
+            float hs=(float)disHeight/(float)preHeight;
+            _overlay.updateEdgeMap(ex,ey,numEdges,ws,hs);
         }
     };
 }
