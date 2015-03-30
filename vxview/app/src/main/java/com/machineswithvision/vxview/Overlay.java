@@ -75,13 +75,15 @@ public class Overlay implements Renderer {
     }
 
     public synchronized void updateEdgeMap(int[] edgesX, int[] edgesY, int numEdges, float ws, float hs) {
-        _vertexBuffer.position(0);
-        _numVertices=0;
-        for(int i=0;i<numEdges&&i<MAX_POINTS;i++) {
-            _vertexBuffer.put((float)edgesX[i]*ws);
-            _vertexBuffer.put((float)edgesY[i]*hs);
-            _numVertices++;
+        if (_vertexBuffer!=null) {
+            _vertexBuffer.position(0);
+            _numVertices = 0;
+            for (int i = 0; i < numEdges && i < MAX_POINTS; i++) {
+                _vertexBuffer.put((float) edgesX[i] * ws);
+                _vertexBuffer.put((float) edgesY[i] * hs);
+                _numVertices++;
+            }
+            _vertexBuffer.position(0);
         }
-        _vertexBuffer.position(0);
     }
 }
