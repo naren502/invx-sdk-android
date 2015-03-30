@@ -41,13 +41,21 @@ include $(PREBUILT_SHARED_LIBRARY)
 # ------
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := invx
+LOCAL_SRC_FILES := $(LOCAL_PATH)/invx/lib/$(TARGET_ARCH_ABI)/libinvx.so
+$(warning $(TARGET_ARCH_ABI))
+include $(PREBUILT_SHARED_LIBRARY)
+
+# ------
+
+include $(CLEAR_VARS)
 
 LOCAL_MODULE := NDK
 LOCAL_SRC_FILES := \
      com_machineswithvision_openvx_JOVX.c
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/invx/include
-LOCAL_SHARED_LIBRARIES := openvx vxu openvx-extras openvx-debug openvx-c_model
+LOCAL_SHARED_LIBRARIES := openvx vxu openvx-extras openvx-debug openvx-c_model invx
 LOCAL_LDLIBS += -llog
 
 include $(BUILD_SHARED_LIBRARY)
