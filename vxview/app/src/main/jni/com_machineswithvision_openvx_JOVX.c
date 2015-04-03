@@ -127,7 +127,7 @@ void vx_test_canny(int width,int height,int depth,void* bytes)
                         edges = vxCreateImage(context, width, height, VX_DF_IMAGE_U8);
 
                         vx_threshold hyst = vxCreateThreshold(context, VX_THRESHOLD_TYPE_RANGE, VX_TYPE_UINT8);
-                        vx_int32 lower = 40, upper = 250;
+                        vx_int32 lower = 50, upper = 100;
                         vxSetThresholdAttribute(hyst, VX_THRESHOLD_ATTRIBUTE_THRESHOLD_LOWER, &lower, sizeof(lower));
                         vxSetThresholdAttribute(hyst, VX_THRESHOLD_ATTRIBUTE_THRESHOLD_UPPER, &upper, sizeof(upper));
 

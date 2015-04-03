@@ -50,8 +50,8 @@ public class CameraActivity extends Activity {
     private boolean weHaveBeenResumed = false;
     private boolean existingSurfaceHasSize = false;
     private boolean cameraIsActive = false;
-    private int preWidth;
-    private int preHeight;
+    private int preWidth = 800; // Preferred preview width ... will but updated on camera setup;
+    private int preHeight = 480; // Preferred preview height ... will but updated on camera setup;
     private int disWidth;
     private int disHeight;
 
@@ -66,8 +66,6 @@ public class CameraActivity extends Activity {
     private Object contAutoFocusCallback = null;
 
     private static final String FOCUS_CONTINUOUS_AUTO = "continuous-picture";
-
-    private InVX _invx = null;
 
     /**
      *
@@ -85,7 +83,7 @@ public class CameraActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        _invx = new InVX(this);
+        InVX.init(this);
 
         JOVX.jovxCreateContext();
 
@@ -272,7 +270,7 @@ public class CameraActivity extends Activity {
         //Attempt to set up camera with VGA preview frame output or as close as possible
         ResolutionOptions preOptions = new ResolutionOptions(parameters.get("preview-size-values"));
         if (preOptions.getSize()>0) {
-            ResolutionOptions.Option selected = preOptions.leastDifference(240, 320);
+            ResolutionOptions.Option selected = preOptions.leastDifference(preWidth, preHeight);
             preWidth = selected.getWidth();
             preHeight = selected.getHeight();
             Log.d(TAG, "Preview setup as "+preWidth+"x"+preHeight);
