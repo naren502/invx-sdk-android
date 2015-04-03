@@ -32,6 +32,14 @@ vx_image dx = 0;
 vx_image dy = 0;
 vx_image mag = 0;
 
+void initInVX(JavaVM *vm);
+
+jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+    __android_log_print(ANDROID_LOG_VERBOSE, "NDK", "JNI_OnLoad vp=%p",(void*)vm);
+	initInVX(vm);
+	return JNI_VERSION_1_6;
+}
+
 JNIEXPORT void JNICALL Java_com_machineswithvision_openvx_JOVX_jovxCreateContext
   (JNIEnv *env, jclass cls)
 {
