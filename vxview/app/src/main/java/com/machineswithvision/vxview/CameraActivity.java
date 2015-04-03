@@ -32,6 +32,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.machineswithvision.invx.InVX;
 import com.machineswithvision.openvx.JOVX;
 
 import java.io.IOException;
@@ -65,6 +66,8 @@ public class CameraActivity extends Activity {
 
     private static final String FOCUS_CONTINUOUS_AUTO = "continuous-picture";
 
+    private InVX _invx = null;
+
     /**
      *
      */
@@ -80,6 +83,8 @@ public class CameraActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        _invx = new InVX(this);
 
         JOVX.jovxCreateContext();
 
