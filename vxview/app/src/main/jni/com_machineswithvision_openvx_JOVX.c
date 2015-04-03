@@ -124,23 +124,16 @@ void vx_test_canny(int width,int height,int depth,void* bytes)
 
                     if (hframe)// input && output)
                     {
-                        dx = vxCreateImage(context, width, height, VX_DF_IMAGE_S16);
-                        dy = vxCreateImage(context, width, height, VX_DF_IMAGE_S16);
-                        mag = vxCreateImage(context, width, height, VX_DF_IMAGE_S16);
                         edges = vxCreateImage(context, width, height, VX_DF_IMAGE_U8);
 
-                        if (!vxSobel3x3Node (graph, hframe, dx, dy)) {
-                            __android_log_print(ANDROID_LOG_VERBOSE, "NDK", "ERROR: failed to create sobel node!\n");
-                        }
+                        vx_threshold hyst = vxCreateThreshold(context, VX_THRESHOLD_TYPE_RANGE, VX_TYPE_UINT8);
+                        vx_int32 lower = 40, upper = 250;
+                        vxSetThresholdAttribute(hyst, VX_THRESHOLD_ATTRIBUTE_THRESHOLD_LOWER, &lower, sizeof(lower));
+                        vxSetThresholdAttribute(hyst, VX_THRESHOLD_ATTRIBUTE_THRESHOLD_UPPER, &upper, sizeof(upper));
 
-                        if (!vxMagnitudeNode (graph, dx, dy, mag)) {
-                            __android_log_print(ANDROID_LOG_VERBOSE, "NDK", "ERROR: failed to create mag node!\n");
-                        }
-
-                        vx_int32 shift = 7;
-                        vx_scalar sShift = vxCreateScalar(context, VX_TYPE_INT32, &shift);
-                        if (!vxConvertDepthNode (graph, mag, edges,  VX_CONVERT_POLICY_WRAP, sShift)) {
-                            __android_log_print(ANDROID_LOG_VERBOSE, "NDK", "ERROR: failed to create convert node!\n");
+                        if (!vxCannyEdgeDetectorNode(graph,hframe,hyst,3,VX_NORM_L1,edges))
+                        {
+                            __android_log_print(ANDROID_LOG_VERBOSE, "NDK", "ERROR: failed to create node!\n");
                         }
 
                         if (vxVerifyGraph(graph) != VX_SUCCESS) {
