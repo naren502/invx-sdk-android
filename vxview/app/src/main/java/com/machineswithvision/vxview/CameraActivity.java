@@ -71,13 +71,6 @@ public class CameraActivity extends Activity {
     private Camera camera;
     private Overlay _overlay = null;
 
-    private boolean focusAuto = false;
-    private boolean focused = true;
-
-    private Object contAutoFocusCallback = null;
-
-    private static final String FOCUS_CONTINUOUS_AUTO = "continuous-picture";
-
     /**
      *
      */
@@ -295,45 +288,15 @@ public class CameraActivity extends Activity {
         }
         parameters.setPreviewSize(preWidth, preHeight);
 
-        parameters.setFocusMode(FOCUS_CONTINUOUS_AUTO);
-
         if (Log.isLoggable(TAG, Log.DEBUG)) Log.d(TAG, "Preview setup as "+preWidth+"x"+preHeight);
 
         try{
             camera.setParameters(parameters);
         }catch(Exception e) {
-            //continuous autofocus not supported, set macro instead
-            focusAuto = true;
-            try{
-                parameters.setFocusMode(Parameters.FOCUS_MODE_MACRO);
-                camera.setParameters(parameters);
-            }catch(Exception e2) {
-                //macro not supported either, use normal autofocus triggered by user's tap
-                parameters.setFocusMode(Parameters.FOCUS_MODE_AUTO);
-                camera.setParameters(parameters);
-            }
+
         }
         camera.startPreview();
         cameraIsActive=true;
-
-        //this doesn't exist in older APIs, but we only use it on newer APIs
-        //Set 'focused' boolean to indicate whether we are in the middle of a continuous autofocus cycle
-        //If we are in the middle of a cycle, image is likely to be unfocused - therefore we wait until the end of the cycle
-        if(!focusAuto) {
-            contAutoFocusCallback = new Camera.AutoFocusMoveCallback() {
-
-                @Override
-                public void onAutoFocusMoving(boolean start, Camera camera) {
-                    if(start) {
-                        focused = false;
-                    }else{
-                        focused = true;
-                    }
-                }
-            };
-            camera.setAutoFocusMoveCallback((Camera.AutoFocusMoveCallback) contAutoFocusCallback);
-        }
-
         camera.setPreviewCallback(previewCallback);
     }
 
