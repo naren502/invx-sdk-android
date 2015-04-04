@@ -1,5 +1,5 @@
 //
-//  com_machineswithvision_vxview_CameraActivity.c
+//  CameraActivity.c
 //
 //  Created by Anthony Ashbrook on 24/03/2015.
 //
@@ -14,7 +14,7 @@
 // MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
 //
 
-#include "com_machineswithvision_vxview_CameraActivity.h"
+#include "CameraActivity.h"
 
 #include <android/log.h>
 #include <stdio.h>

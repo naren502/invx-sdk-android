@@ -51,7 +51,7 @@ public class CameraActivity extends Activity {
      * Load the native code that implements the native methods
      */
     static {
-        System.loadLibrary("NDK");
+        System.loadLibrary("vxview");
     }
 
     // State
