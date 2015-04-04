@@ -1,5 +1,5 @@
 //
-//  com_machineswithvision_openvx_JOVX.h
+//  com_machineswithvision_vxview_CameraActivity.h
 //
 //  Created by Anthony Ashbrook on 24/03/2015.
 //
@@ -15,35 +15,35 @@
 //
 
 #include <jni.h>
-/* Header for class com_machineswithvision_openvx_JOVX */
+/* Header for class com_machineswithvision_vxview_CameraActivity */
 
-#ifndef _Included_com_machineswithvision_openvx_JOVX
-#define _Included_com_machineswithvision_openvx_JOVX
+#ifndef _Included_com_machineswithvision_vxview_CameraActivity
+#define _Included_com_machineswithvision_vxview_CameraActivity
 #ifdef __cplusplus
 extern "C" {
 #endif
 /*
- * Class:     com_machineswithvision_openvx_JOVX
- * Method:    jovxCreateContext
+ * Class:     com_machineswithvision_vxview_CameraActivity
+ * Method:    createVXContext
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_com_machineswithvision_openvx_JOVX_jovxCreateContext
+JNIEXPORT void JNICALL Java_com_machineswithvision_vxview_CameraActivity_createVXContext
   (JNIEnv *, jclass);
 
 /*
- * Class:     com_machineswithvision_openvx_JOVX
+ * Class:     com_machineswithvision_vxview_CameraActivity
  * Method:    processBytes
  * Signature: (Ljava/nio/ByteBuffer;III)V
  */
-JNIEXPORT void JNICALL Java_com_machineswithvision_openvx_JOVX_processBytes
+JNIEXPORT void JNICALL Java_com_machineswithvision_vxview_CameraActivity_processBytes
   (JNIEnv *, jclass, jobject, jint, jint, jint);
 
 /*
- * Class:     com_machineswithvision_openvx_JOVX
- * Method:    jovxReleaseContext
+ * Class:     com_machineswithvision_vxview_CameraActivity
+ * Method:    releaseVXContext
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_com_machineswithvision_openvx_JOVX_jovxReleaseContext
+JNIEXPORT void JNICALL Java_com_machineswithvision_vxview_CameraActivity_releaseVXContext
   (JNIEnv *, jclass);
 
 #ifdef __cplusplus

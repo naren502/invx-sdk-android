@@ -33,7 +33,6 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.machineswithvision.invx.InVX;
-import com.machineswithvision.openvx.JOVX;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -41,7 +40,16 @@ import java.nio.ByteBuffer;
 public class CameraActivity extends Activity {
     private static final String TAG = "CameraActivity";
 
+    /**
+     * Declaration of methods that will be implemented in native code
+     */
+    public static native void createVXContext();
+    public static native void processBytes(ByteBuffer buffer, int width, int height, int depth);
+    public static native void releaseVXContext();
 
+    /**
+     * Load the native code that implements the native methods
+     */
     static {
         System.loadLibrary("NDK");
     }
@@ -73,7 +81,7 @@ public class CameraActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        JOVX.jovxReleaseContext();
+        releaseVXContext();
     }
 
     /**
@@ -85,7 +93,7 @@ public class CameraActivity extends Activity {
 
         InVX.init(this);
 
-        JOVX.jovxCreateContext();
+        createVXContext();
 
         // Create a fixed-orientation fullscreen view with no title
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -346,7 +354,7 @@ public class CameraActivity extends Activity {
             ByteBuffer buffer = ByteBuffer.allocateDirect(preWidth*preHeight);
             buffer.put(yuv,0,preWidth*preHeight);
             Log.d(TAG, "Calling processBytes");
-            JOVX.processBytes(buffer, preWidth, preHeight, 1);
+            processBytes(buffer, preWidth, preHeight, 1);
             Log.d(TAG, "Done processBytes");
             buffer.clear();
             buffer.get(yuv, 0, preWidth * preHeight);

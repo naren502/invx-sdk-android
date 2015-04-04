@@ -1,5 +1,5 @@
 //
-//  com_machineswithvision_openvx_JOVX.c
+//  com_machineswithvision_vxview_CameraActivity.c
 //
 //  Created by Anthony Ashbrook on 24/03/2015.
 //
@@ -14,7 +14,7 @@
 // MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
 //
 
-#include "com_machineswithvision_openvx_JOVX.h"
+#include "com_machineswithvision_vxview_CameraActivity.h"
 
 #include <android/log.h>
 #include <stdio.h>
@@ -32,13 +32,13 @@ vx_image dx = 0;
 vx_image dy = 0;
 vx_image mag = 0;
 
-JNIEXPORT void JNICALL Java_com_machineswithvision_openvx_JOVX_jovxCreateContext
+JNIEXPORT void JNICALL Java_com_machineswithvision_vxview_CameraActivity_createVXContext
   (JNIEnv *env, jclass cls)
 {
     context = vxCreateContext();
 }
 
-JNIEXPORT void JNICALL Java_com_machineswithvision_openvx_JOVX_processBytes
+JNIEXPORT void JNICALL Java_com_machineswithvision_vxview_CameraActivity_processBytes
    (JNIEnv *env, jclass cls, jobject buffer, jint width, jint height, jint depth)
 {
 
@@ -52,7 +52,7 @@ JNIEXPORT void JNICALL Java_com_machineswithvision_openvx_JOVX_processBytes
      }
 }
 
-JNIEXPORT void JNICALL Java_com_machineswithvision_openvx_JOVX_jovxReleaseContext
+JNIEXPORT void JNICALL Java_com_machineswithvision_vxview_CameraActivity_releaseVXContext
   (JNIEnv *env, jclass cls)
 {
 
