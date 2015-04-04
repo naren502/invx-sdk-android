@@ -62,6 +62,9 @@ public class CameraActivity extends Activity {
     private int preHeight = 480; // Preferred preview height ... will but updated on camera setup;
     private int disWidth;
     private int disHeight;
+    private ByteBuffer imageBuffer = null;
+    int[] edgeX = new int[Overlay.MAX_POINTS];
+    int[] edgeY = new int[Overlay.MAX_POINTS];
 
     // Components
     private SurfaceHolder holder;
@@ -354,32 +357,30 @@ public class CameraActivity extends Activity {
     private Camera.PreviewCallback previewCallback = new Camera.PreviewCallback() {
         public void onPreviewFrame(byte[] yuv, Camera camera) {
 
-            ByteBuffer buffer = ByteBuffer.allocateDirect(preWidth*preHeight);
-            buffer.put(yuv,0,preWidth*preHeight);
+            if (imageBuffer==null || imageBuffer.capacity()!=preWidth*preHeight)
+                imageBuffer = ByteBuffer.allocateDirect(preWidth*preHeight);
+            imageBuffer.clear();
+            imageBuffer.put(yuv, 0, preWidth * preHeight);
             Log.d(TAG, "Calling processBytes");
-            processBytes(buffer, preWidth, preHeight);
+            processBytes(imageBuffer, preWidth, preHeight);
             Log.d(TAG, "Done processBytes");
-            buffer.clear();
-            buffer.get(yuv, 0, preWidth * preHeight);
-
-            int[] ex = new int[_overlay.MAX_POINTS];
-            int[] ey = new int[_overlay.MAX_POINTS];
+            imageBuffer.clear();
+            imageBuffer.get(yuv, 0, preWidth * preHeight);
             int numEdges = 0;
             for(int y=0;y<preHeight;y++) {
                 for(int x=0;x<preWidth;x++) {
                     if (yuv[x+y*preWidth]!=0) {
-                        if (numEdges<_overlay.MAX_POINTS) {
-                            ex[numEdges] = x;
-                            ey[numEdges] = y;
+                        if (numEdges<Overlay.MAX_POINTS) {
+                            edgeX[numEdges] = x;
+                            edgeY[numEdges] = y;
                             numEdges++;
                         }
                     }
                 }
             }
-
             float ws=(float)disWidth/(float)preWidth;
             float hs=(float)disHeight/(float)preHeight;
-            if (_overlay!=null) _overlay.updateEdgeMap(ex,ey,numEdges,ws,hs);
+            if (_overlay!=null) _overlay.updateEdgeMap(edgeX, edgeY,numEdges,ws,hs);
         }
     };
 }

@@ -115,8 +115,10 @@ void initialiseGraph(int width, int height) {
         outputBuffer
     };
 
+    // Create an OpenVX graph
     graph = vxCreateGraph(context);
 
+    // Create an input image mapped to host memory
     input = vxCreateImageFromHandle(context, VX_DF_IMAGE_U8, in_addrs, in_ptrs, VX_IMPORT_TYPE_HOST);
     if (vxGetStatus((vx_reference)input) != VX_SUCCESS)
     {
@@ -124,6 +126,7 @@ void initialiseGraph(int width, int height) {
         vxReleaseImage(&input);
     }
 
+    // Create an output image mapped to host memory
     edges = vxCreateImageFromHandle(context, VX_DF_IMAGE_U8, out_addrs, out_ptrs, VX_IMPORT_TYPE_HOST);
     if (vxGetStatus((vx_reference)edges) != VX_SUCCESS)
     {
@@ -131,14 +134,14 @@ void initialiseGraph(int width, int height) {
         vxReleaseImage(&edges);
     }
 
-    if (input&&edges) // input && output)
+    if (input&&edges) // Only proceed if images were created successfully
     {
         vx_threshold hyst = vxCreateThreshold(context, VX_THRESHOLD_TYPE_RANGE, VX_TYPE_UINT8);
         vx_int32 lower = 50, upper = 100;
         vxSetThresholdAttribute(hyst, VX_THRESHOLD_ATTRIBUTE_THRESHOLD_LOWER, &lower, sizeof(lower));
         vxSetThresholdAttribute(hyst, VX_THRESHOLD_ATTRIBUTE_THRESHOLD_UPPER, &upper, sizeof(upper));
 
-        // Add a Canny node to the graph
+        // Add a Canny node to the graph, linking the input and edges images
         if (!vxCannyEdgeDetectorNode(graph, input, hyst, 3, VX_NORM_L1, edges))
         {
             __android_log_print(ANDROID_LOG_VERBOSE, "vxview", "ERROR: failed to create node!\n");
@@ -147,7 +150,10 @@ void initialiseGraph(int width, int height) {
         // Verify the graph for safe execution
         if (vxVerifyGraph(graph) != VX_SUCCESS) {
             __android_log_print(ANDROID_LOG_VERBOSE, "vxview", "ERROR: input verifying graph!\n");
+            releaseResources();
         }
+    } else {
+        releaseResources();
     }
 }
 
