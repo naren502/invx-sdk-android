@@ -7,3 +7,6 @@ vxview/build
 vxview/app/build
 vxview/app/src/main/libs
 vxview/app/src/main/obj
+.gradle/
+vxview/app/src/main/invx/
+vxview/app/src/main/res/raw/
