@@ -108,11 +108,9 @@ public class CameraActivity extends Activity {
                 synchronized (CameraActivity.this) {
                     if (weHaveBeenResumed) {
                         createCamera();
-                        if (Log.isLoggable(TAG, Log.DEBUG))
-                            Log.d(TAG, "Surface created - creating camera");
+                        if (Log.isLoggable(TAG, Log.DEBUG)) Log.d(TAG, "Surface created - creating camera");
                     } else {
-                        if (Log.isLoggable(TAG, Log.DEBUG))
-                            Log.d(TAG, "Surface created - not yet resumed so don't create the camera");
+                        if (Log.isLoggable(TAG, Log.DEBUG)) Log.d(TAG, "Surface created - not yet resumed so don't create the camera");
                     }
                 }
             }
@@ -122,18 +120,15 @@ public class CameraActivity extends Activity {
              */
             @Override
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-                if (Log.isLoggable(TAG, Log.DEBUG))
-                    Log.d(TAG, "Surface changed: " + format + "," + width + "," + height);
+                if (Log.isLoggable(TAG, Log.DEBUG)) Log.d(TAG, "Surface changed: " + format + "," + width + "," + height);
                 synchronized (CameraActivity.this) {
                     if (cameraIsActive) {
-                        if (Log.isLoggable(TAG, Log.WARN))
-                            Log.w(TAG, "Scanner is already active - ignoring!");
+                        if (Log.isLoggable(TAG, Log.WARN)) Log.w(TAG, "Scanner is already active - ignoring!");
                     } else {
                         // We always expect the reader screen to run fixed in landscape mode.
                         // In some circs the moto milestone running 2.1 reverses the width/height
                         if (width < height) {
-                            if (Log.isLoggable(TAG, Log.WARN))
-                                Log.w(TAG, "Width and height appear to be swapped - swapping back!");
+                            if (Log.isLoggable(TAG, Log.WARN)) Log.w(TAG, "Width and height appear to be swapped - swapping back!");
                             int tmp = width;
                             width = height;
                             height = tmp;
@@ -145,8 +140,7 @@ public class CameraActivity extends Activity {
                         if (weHaveBeenResumed) {
                             startCamera();
                         } else {
-                            if (Log.isLoggable(TAG, Log.DEBUG))
-                                Log.d(TAG, "Not yet resumed so don't start the camera yet!");
+                            if (Log.isLoggable(TAG, Log.DEBUG)) Log.d(TAG, "Not yet resumed so don't start the camera yet!");
                         }
 
                         existingSurfaceHasSize = true;
@@ -163,8 +157,7 @@ public class CameraActivity extends Activity {
                 existingSurfaceHasSize = false;
 
                 if (cameraIsActive) {
-                    if (Log.isLoggable(TAG, Log.WARN))
-                        Log.w(TAG, "We should never get here with an active camera!");
+                    if (Log.isLoggable(TAG, Log.WARN)) Log.w(TAG, "We should never get here with an active camera!");
                 }
             }
         });
@@ -324,9 +317,9 @@ public class CameraActivity extends Activity {
                 imageBuffer = ByteBuffer.allocateDirect(preWidth*preHeight);
             imageBuffer.clear();
             imageBuffer.put(yuv, 0, preWidth * preHeight);
-            Log.d(TAG, "Calling processBytes");
+            if (Log.isLoggable(TAG, Log.DEBUG)) Log.d(TAG, "Calling processBytes");
             processBytes(imageBuffer, preWidth, preHeight);
-            Log.d(TAG, "Done processBytes");
+            if (Log.isLoggable(TAG, Log.DEBUG)) Log.d(TAG, "Done processBytes");
             imageBuffer.clear();
             imageBuffer.get(yuv, 0, preWidth * preHeight);
             int numEdges = 0;
