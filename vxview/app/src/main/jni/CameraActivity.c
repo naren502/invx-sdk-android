@@ -20,8 +20,6 @@
 #include <stdio.h>
 #include "VX/vx.h"
 
-void vx_test_canny(int width,int height,void* bytes);
-
 /**
  * Global data for this application
  */
@@ -31,9 +29,8 @@ void *outputBuffer = 0;
 vx_graph graph = 0;
 vx_image input = 0;
 vx_image edges = 0;
-vx_image dx = 0;
-vx_image dy = 0;
-vx_image mag = 0;
+
+// --------------------------
 
 /**
  * OpenVX context creation
@@ -44,29 +41,12 @@ JNIEXPORT void JNICALL Java_com_machineswithvision_vxview_CameraActivity_createV
     context = vxCreateContext();
 }
 
-/**
- *
- */
-JNIEXPORT void JNICALL Java_com_machineswithvision_vxview_CameraActivity_processBytes
-   (JNIEnv *env, jclass cls, jobject buffer, jint width, jint height)
-{
-
-
-    void* ptr = (*env)->GetDirectBufferAddress(env,buffer);
-
-    if (ptr) {
-        vx_test_canny(width, height, ptr);
-     } else {
-        __android_log_print(ANDROID_LOG_VERBOSE, "vxview", "ptr is NULL!D\n");
-     }
-}
+// --------------------------
 
 /**
- *
+ * Releases resources dependent on the context
  */
-JNIEXPORT void JNICALL Java_com_machineswithvision_vxview_CameraActivity_releaseVXContext
-  (JNIEnv *env, jclass cls)
-{
+void releaseResources() {
 
     if (input) {
         vxReleaseImage(&input);
@@ -76,26 +56,6 @@ JNIEXPORT void JNICALL Java_com_machineswithvision_vxview_CameraActivity_release
     if (edges) {
         vxReleaseImage(&edges);
         edges = 0;
-    }
-
-    if (dx) {
-        vxReleaseImage(&dx);
-        dx = 0;
-    }
-
-    if (dy) {
-        vxReleaseImage(&dy);
-        dy = 0;
-    }
-
-    if (mag) {
-        vxReleaseImage(&mag);
-        mag = 0;
-    }
-
-    if (context) {
-        vxReleaseContext(&context);
-        context = 0;
     }
 
     if (inputBuffer) {
@@ -109,6 +69,23 @@ JNIEXPORT void JNICALL Java_com_machineswithvision_vxview_CameraActivity_release
     }
 
     graph = 0;
+}
+
+// --------------------------
+
+/**
+ *
+ */
+JNIEXPORT void JNICALL Java_com_machineswithvision_vxview_CameraActivity_releaseVXContext
+  (JNIEnv *env, jclass cls)
+{
+    // Release all of the resources dependant upon the context
+    releaseResources();
+
+    if (context) {
+        vxReleaseContext(&context);
+        context = 0;
+    }
 }
 
 // --------------------------
@@ -154,16 +131,15 @@ void initialiseGraph(int width, int height) {
         vxReleaseImage(&edges);
     }
 
-    if (input&&edges)// input && output)
+    if (input&&edges) // input && output)
     {
-
         vx_threshold hyst = vxCreateThreshold(context, VX_THRESHOLD_TYPE_RANGE, VX_TYPE_UINT8);
         vx_int32 lower = 50, upper = 100;
         vxSetThresholdAttribute(hyst, VX_THRESHOLD_ATTRIBUTE_THRESHOLD_LOWER, &lower, sizeof(lower));
         vxSetThresholdAttribute(hyst, VX_THRESHOLD_ATTRIBUTE_THRESHOLD_UPPER, &upper, sizeof(upper));
 
         // Add a Canny node to the graph
-        if (!vxCannyEdgeDetectorNode(graph, input, hyst, 3, VX_NORM_L1,edges))
+        if (!vxCannyEdgeDetectorNode(graph, input, hyst, 3, VX_NORM_L1, edges))
         {
             __android_log_print(ANDROID_LOG_VERBOSE, "vxview", "ERROR: failed to create node!\n");
         }
@@ -177,31 +153,37 @@ void initialiseGraph(int width, int height) {
 
 // --------------------------
 
-void vx_test_canny(int width,int height,void* bytes)
+/**
+ * Process the camera image passed from Java as a direct ByteBuffer. Return the
+ * edgemap in the same ByteBuffer.
+ */
+JNIEXPORT void JNICALL Java_com_machineswithvision_vxview_CameraActivity_processBytes
+   (JNIEnv *env, jclass cls, jobject buffer, jint width, jint height)
 {
-            if (context) {
-
-                if (!graph) initialiseGraph(width, height);
-
-                if (graph) {
-
-                    memcpy(inputBuffer, bytes, width*height*sizeof(vx_uint8));
-
-                    if (vxProcessGraph(graph) != VX_SUCCESS) {
-                     __android_log_print(ANDROID_LOG_VERBOSE, "NDK", "ERROR: error processing graph!\n");
-                    }
-
-                    vx_rectangle_t rect;
-                    rect.start_x = rect.start_y = 0;
-                    rect.end_x = width;
-                    rect.end_y = height;
-
-                    memcpy(bytes, outputBuffer, width*height*sizeof(vx_uint8));
-
+    void* bytes = (*env)->GetDirectBufferAddress(env,buffer);
+    if (bytes) {
+        if (context) {
+            // We defer initialise the OpenVX graph until we get the first frame
+            if (!graph) initialiseGraph(width, height);
+            if (graph) {
+                // Copy the Java ByteBuffer data to the input image
+                memcpy(inputBuffer, bytes, width*height*sizeof(vx_uint8));
+                // Execute the graph
+                vx_status status = vxProcessGraph(graph);
+                // Report if the graph failed to execute
+                 if (status != VX_SUCCESS) {
+                    __android_log_print(ANDROID_LOG_VERBOSE, "vxview", "ERROR: error processing openvx graph!\n");
                 }
-			} else {
-			    __android_log_print(ANDROID_LOG_VERBOSE, "NDK", "No context. Skipping processing.");
-			}
+                // Copy the output image to the Java ByteBuffer
+                memcpy(bytes, outputBuffer, width*height*sizeof(vx_uint8));
+            }
+        } else {
+            __android_log_print(ANDROID_LOG_VERBOSE, "vxview", "ERROR: No context. Skipping processing.");
+        }
+     } else {
+        __android_log_print(ANDROID_LOG_VERBOSE, "vxview", "ERROR: ByteBuffer bytes is NULL!D\n");
+     }
 }
 
-// ---------
+// --------------------------
+
