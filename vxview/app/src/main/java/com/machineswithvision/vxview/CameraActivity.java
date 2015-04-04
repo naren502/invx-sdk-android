@@ -44,7 +44,7 @@ public class CameraActivity extends Activity {
      * Declaration of methods that will be implemented in native code
      */
     public static native void createVXContext();
-    public static native void processBytes(ByteBuffer buffer, int width, int height, int depth);
+    public static native void processBytes(ByteBuffer buffer, int width, int height);
     public static native void releaseVXContext();
 
     /**
@@ -357,7 +357,7 @@ public class CameraActivity extends Activity {
             ByteBuffer buffer = ByteBuffer.allocateDirect(preWidth*preHeight);
             buffer.put(yuv,0,preWidth*preHeight);
             Log.d(TAG, "Calling processBytes");
-            processBytes(buffer, preWidth, preHeight, 1);
+            processBytes(buffer, preWidth, preHeight);
             Log.d(TAG, "Done processBytes");
             buffer.clear();
             buffer.get(yuv, 0, preWidth * preHeight);

@@ -33,10 +33,10 @@ JNIEXPORT void JNICALL Java_com_machineswithvision_vxview_CameraActivity_createV
 /*
  * Class:     com_machineswithvision_vxview_CameraActivity
  * Method:    processBytes
- * Signature: (Ljava/nio/ByteBuffer;III)V
+ * Signature: (Ljava/nio/ByteBuffer;II)V
  */
 JNIEXPORT void JNICALL Java_com_machineswithvision_vxview_CameraActivity_processBytes
-  (JNIEnv *, jclass, jobject, jint, jint, jint);
+  (JNIEnv *, jclass, jobject, jint, jint);
 
 /*
  * Class:     com_machineswithvision_vxview_CameraActivity
