@@ -81,7 +81,6 @@ public class CameraActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        releaseVXContext();
     }
 
     /**
@@ -92,8 +91,6 @@ public class CameraActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         InVX.init(this);
-
-        createVXContext();
 
         // Create a fixed-orientation fullscreen view with no title
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -196,6 +193,9 @@ public class CameraActivity extends Activity {
         if (Log.isLoggable(TAG, Log.DEBUG)) Log.d(TAG, "onResume()");
         super.onResume();
 
+        // We are about to start the camera so first we need to create the OpenVX context
+        createVXContext();
+
         synchronized (this) {
             weHaveBeenResumed = true;
 
@@ -222,6 +222,9 @@ public class CameraActivity extends Activity {
             weHaveBeenResumed = false;
             stopAndReleaseCamera();
         }
+
+        // The camera how now stopped so we can release the OpenVX context
+        releaseVXContext();
     }
 
     /**
