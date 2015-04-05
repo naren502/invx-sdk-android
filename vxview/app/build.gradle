@@ -9,14 +9,11 @@ android {
     defaultConfig {
         applicationId "com.machineswithvision.vxview"
         minSdkVersion 8
-        targetSdkVersion 19
+        targetSdkVersion 22
         versionCode 1
         versionName "1.0"
         renderscriptTargetApi 20
         renderscriptSupportModeEnabled true
-        ndk {
-            moduleName "NDK"
-        }
     }
 
     sourceSets.main {
@@ -52,6 +49,6 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:21.0.3'
+    compile 'com.android.support:appcompat-v7:22.0.0'
     compile files('src/main/invx/java/invx.jar')
 }

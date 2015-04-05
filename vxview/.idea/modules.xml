@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/invx/invx.iml" filepath="$PROJECT_DIR$/invx/invx.iml" />
       <module fileurl="file://$PROJECT_DIR$/vxview.iml" filepath="$PROJECT_DIR$/vxview.iml" />
     </modules>
   </component>

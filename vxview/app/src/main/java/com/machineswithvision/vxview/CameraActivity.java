@@ -51,6 +51,12 @@ public class CameraActivity extends Activity {
      * Load the native code that implements the native methods
      */
     static {
+        System.loadLibrary("openvx-debug");
+        System.loadLibrary("openvx");
+        System.loadLibrary("vxu");
+        System.loadLibrary("openvx-extras");
+        System.loadLibrary("openvx-c_model");
+        System.loadLibrary("invx");
         System.loadLibrary("vxview");
     }
 
@@ -161,6 +167,7 @@ public class CameraActivity extends Activity {
                 }
             }
         });
+        holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS); // Needed for older platforms
 
         GLSurfaceView glView = new GLSurfaceView(this);
         glView.setZOrderMediaOverlay(true);
@@ -285,12 +292,13 @@ public class CameraActivity extends Activity {
 
         try{
             camera.setParameters(parameters);
+            camera.startPreview();
+            cameraIsActive=true;
+            camera.setPreviewCallback(previewCallback);
         }catch(Exception e) {
-
+            Log.e(TAG, "Exception:", e);
         }
-        camera.startPreview();
-        cameraIsActive=true;
-        camera.setPreviewCallback(previewCallback);
+
     }
 
     /**

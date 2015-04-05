@@ -1,1 +1,1 @@
-include ':app', ':invx'
+include ':app'
