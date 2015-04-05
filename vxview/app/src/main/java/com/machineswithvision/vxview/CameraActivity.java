@@ -51,12 +51,6 @@ public class CameraActivity extends Activity {
      * Load the native code that implements the native methods
      */
     static {
-        System.loadLibrary("openvx-debug");
-        System.loadLibrary("openvx");
-        System.loadLibrary("vxu");
-        System.loadLibrary("openvx-extras");
-        System.loadLibrary("openvx-c_model");
-        System.loadLibrary("invx");
         System.loadLibrary("vxview");
     }
 
