@@ -1,0 +1,2 @@
+version:		1.0.1
+release:		https://github.com/machineswithvision/invx/releases/tag/v1.0.1
